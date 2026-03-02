@@ -11,25 +11,32 @@ import { auth, db, googleProvider } from '../firebase'
 
 const ADMIN_EMAILS = ['ellrz1718@gmail.com']
 
-async function buildUserState(firebaseUser) {
-    const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email)
-    const userRef = doc(db, 'users', firebaseUser.uid)
-    const snap = await getDoc(userRef)
-    if (!snap.exists()) {
-        await setDoc(userRef, {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            role: isAdmin ? 'admin' : 'user',
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-        })
-    } else {
-        await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true })
+// Simpan user ke Firestore — kalau gagal, tetap login!
+async function syncUserToFirestore(firebaseUser) {
+    try {
+        const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email)
+        const userRef = doc(db, 'users', firebaseUser.uid)
+        const snap = await getDoc(userRef)
+        if (!snap.exists()) {
+            await setDoc(userRef, {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+                role: isAdmin ? 'admin' : 'user',
+                createdAt: serverTimestamp(),
+                lastLogin: serverTimestamp(),
+            })
+        } else {
+            await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true })
+        }
+        const profile = (await getDoc(userRef)).data()
+        return { isAdmin, profile }
+    } catch (err) {
+        // Firestore gagal → tetap return isAdmin berdasarkan email
+        console.warn('[Auth] Firestore sync failed (user still logged in):', err.code)
+        return { isAdmin: ADMIN_EMAILS.includes(firebaseUser.email), profile: null }
     }
-    const profile = (await getDoc(userRef)).data()
-    return { isAdmin, profile }
 }
 
 const useAuthStore = create((set) => ({
@@ -39,23 +46,23 @@ const useAuthStore = create((set) => ({
     loading: true,
 
     initAuth: () => {
-        // Cek dulu kalau ada pending redirect result
+        // Cek redirect result (untuk mobile yang popup jadi redirect)
         getRedirectResult(auth)
             .then(async (result) => {
                 if (result?.user) {
-                    // Ada hasil dari redirect login
-                    const { isAdmin, profile } = await buildUserState(result.user)
+                    const { isAdmin, profile } = await syncUserToFirestore(result.user)
                     set({ user: result.user, userProfile: profile, isAdmin, loading: false })
                 }
             })
-            .catch(() => {
-                // Tidak ada redirect / error — biarkan onAuthStateChanged yang handle
+            .catch((err) => {
+                // Bukan error fatal — biarkan onAuthStateChanged yang handle
+                console.warn('[Auth] getRedirectResult:', err?.code)
             })
 
-        // onAuthStateChanged selalu handle semua kasus auth
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                const { isAdmin, profile } = await buildUserState(firebaseUser)
+                // User berhasil login — sync ke Firestore (tapi kalau gagal tetap set user)
+                const { isAdmin, profile } = await syncUserToFirestore(firebaseUser)
                 set({ user: firebaseUser, userProfile: profile, isAdmin, loading: false })
             } else {
                 set({ user: null, userProfile: null, isAdmin: false, loading: false })
@@ -64,14 +71,12 @@ const useAuthStore = create((set) => ({
         return unsub
     },
 
-    // ── Login: popup dulu, kalau diblokir → redirect ────────
     loginWithGoogle: async () => {
         try {
-            // Coba popup dulu (lebih reliable, langsung tahu hasilnya)
             await signInWithPopup(auth, googleProvider)
             return { success: true }
         } catch (err) {
-            // Kalau popup diblokir browser → fallback ke redirect
+            // Popup diblokir → fallback ke redirect
             if (
                 err.code === 'auth/popup-blocked' ||
                 err.code === 'auth/popup-closed-by-user' ||
@@ -80,11 +85,11 @@ const useAuthStore = create((set) => ({
                 try {
                     await signInWithRedirect(auth, googleProvider)
                     return { success: true }
-                } catch (redirectErr) {
-                    return { success: false, error: redirectErr.message }
+                } catch (e2) {
+                    return { success: false, error: e2.message }
                 }
             }
-            console.error('Login error:', err.code, err.message)
+            console.error('[Auth] loginWithGoogle error:', err.code)
             return { success: false, error: err.message }
         }
     },
