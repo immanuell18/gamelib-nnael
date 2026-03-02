@@ -1,96 +1,99 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import {
+    collection, doc, setDoc, deleteDoc,
+    onSnapshot, serverTimestamp, query, orderBy,
+} from 'firebase/firestore'
+import { db } from '../firebase'
 
-const useGameStore = create(
-    persist(
-        (set, get) => ({
-            // === USER LIBRARY ===
-            library: [], // { id, rawg_id, title, background_image, genres, rating, metacritic, released, platforms, status, personal_rating, play_hours, notes, added_at, updated_at }
+// ── Zustand store: library disimpan per user di Firestore ──
+const useGameStore = create((set, get) => ({
+    library: [],
+    unsubLibrary: null,   // cleanup Firestore listener
 
-            // === SEARCH STATE ===
-            searchResults: [],
-            searchQuery: '',
-            isSearching: false,
-            searchError: null,
+    searchResults: [],
+    searchQuery: '',
+    isSearching: false,
+    searchError: null,
+    activeFilter: 'all',
+    activeView: 'grid',
 
-            // === UI STATE ===
-            activeFilter: 'all', // 'all' | 'playing' | 'completed' | 'on-hold' | 'wishlist' | 'dropped'
-            activeView: 'grid', // 'grid' | 'list'
+    // ── Subscribe to user's library realtime ────────────────
+    subscribeLibrary: (uid) => {
+        const prev = get().unsubLibrary
+        if (prev) prev()   // cleanup previous listener
 
-            // === LIBRARY ACTIONS ===
-            addGame: (game, status = 'wishlist') => {
-                const existing = get().library.find(g => g.rawg_id === game.id)
-                if (existing) return false
+        const q = query(
+            collection(db, 'library', uid, 'games'),
+            orderBy('updated_at', 'desc')
+        )
+        const unsub = onSnapshot(q, (snap) => {
+            const games = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            set({ library: games })
+        })
+        set({ unsubLibrary: unsub })
+    },
 
-                const newEntry = {
-                    id: `game_${Date.now()}`,
-                    rawg_id: game.id,
-                    title: game.name,
-                    background_image: game.background_image,
-                    genres: game.genres?.map(g => g.name) || [],
-                    rating: game.rating || 0,
-                    metacritic: game.metacritic || null,
-                    released: game.released || null,
-                    platforms: game.platforms?.map(p => p.platform.name) || [],
-                    status,
-                    personal_rating: null,
-                    play_hours: 0,
-                    notes: '',
-                    added_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                }
+    // ── Unsubscribe (on logout) ──────────────────────────────
+    unsubscribeLibrary: () => {
+        const unsub = get().unsubLibrary
+        if (unsub) unsub()
+        set({ library: [], unsubLibrary: null })
+    },
 
-                set(state => ({ library: [...state.library, newEntry] }))
-                return true
-            },
+    // ── Add game ─────────────────────────────────────────────
+    addGame: async (uid, game, status = 'wishlist') => {
+        const existing = get().library.find(g => g.rawg_id === (game.id || game.rawg_id))
+        if (existing) return false
 
-            removeGame: (id) => {
-                set(state => ({ library: state.library.filter(g => g.id !== id) }))
-            },
+        const docId = `rawg_${game.id || game.rawg_id}`
+        const gameRef = doc(db, 'library', uid, 'games', docId)
 
-            updateGame: (id, updates) => {
-                set(state => ({
-                    library: state.library.map(g =>
-                        g.id === id
-                            ? { ...g, ...updates, updated_at: new Date().toISOString() }
-                            : g
-                    )
-                }))
-            },
+        await setDoc(gameRef, {
+            rawg_id: game.id || game.rawg_id,
+            title: game.name || game.title,
+            background_image: game.background_image || null,
+            genres: game.genres?.map(g => typeof g === 'string' ? g : g.name) || [],
+            rating: game.rating || 0,
+            metacritic: game.metacritic || null,
+            released: game.released || null,
+            platforms: game.platforms?.map(p => p.platform?.name || p) || [],
+            status,
+            personal_rating: null,
+            play_hours: 0,
+            notes: '',
+            added_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+        })
+        return true
+    },
 
-            updateStatus: (id, status) => {
-                set(state => ({
-                    library: state.library.map(g =>
-                        g.id === id
-                            ? { ...g, status, updated_at: new Date().toISOString() }
-                            : g
-                    )
-                }))
-            },
+    // ── Remove game ──────────────────────────────────────────
+    removeGame: async (uid, docId) => {
+        await deleteDoc(doc(db, 'library', uid, 'games', docId))
+    },
 
-            isInLibrary: (rawg_id) => {
-                return get().library.find(g => g.rawg_id === rawg_id) || null
-            },
+    // ── Update game ──────────────────────────────────────────
+    updateGame: async (uid, docId, updates) => {
+        await setDoc(
+            doc(db, 'library', uid, 'games', docId),
+            { ...updates, updated_at: serverTimestamp() },
+            { merge: true }
+        )
+    },
 
-            // === SEARCH ACTIONS ===
-            setSearchResults: (results) => set({ searchResults: results }),
-            setSearchQuery: (query) => set({ searchQuery: query }),
-            setIsSearching: (val) => set({ isSearching: val }),
-            setSearchError: (err) => set({ searchError: err }),
-            clearSearch: () => set({ searchResults: [], searchQuery: '', searchError: null }),
+    // ── Check if in library ──────────────────────────────────
+    isInLibrary: (rawgId) => {
+        return get().library.find(g => g.rawg_id === rawgId) || null
+    },
 
-            // === FILTER ACTIONS ===
-            setActiveFilter: (filter) => set({ activeFilter: filter }),
-            setActiveView: (view) => set({ activeView: view }),
-
-            // NOTE: Computed selectors are intentionally removed from store.
-            // Use useMemo in components to avoid Zustand getSnapshot infinite loop.
-        }),
-        {
-            name: 'gamelib-storage',
-            partialize: (state) => ({ library: state.library }),
-        }
-    )
-)
+    // ── Search state ─────────────────────────────────────────
+    setSearchResults: (r) => set({ searchResults: r }),
+    setSearchQuery: (q) => set({ searchQuery: q }),
+    setIsSearching: (v) => set({ isSearching: v }),
+    setSearchError: (e) => set({ searchError: e }),
+    clearSearch: () => set({ searchResults: [], searchQuery: '', searchError: null }),
+    setActiveFilter: (f) => set({ activeFilter: f }),
+    setActiveView: (v) => set({ activeView: v }),
+}))
 
 export default useGameStore

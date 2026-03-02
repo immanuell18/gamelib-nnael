@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Star, Clock, FileText, Gamepad2, ExternalLink, CheckCircle, Pause, BookmarkPlus, Trash2, Save } from 'lucide-react'
 import useGameStore from '../store/useGameStore'
+import useAuthStore from '../store/useAuthStore'
 import toast from 'react-hot-toast'
 
 const STATUSES = [
@@ -23,6 +24,7 @@ export default function GameDetailModal({ game, onClose }) {
     const removeGame = useGameStore(s => s.removeGame)
     const updateGame = useGameStore(s => s.updateGame)
     const isInLibrary = useGameStore(s => s.isInLibrary)
+    const { user } = useAuthStore()
 
     const rawgId = game?.id || game?.rawg_id
     const libraryEntry = isInLibrary(rawgId)
@@ -41,20 +43,22 @@ export default function GameDetailModal({ game, onClose }) {
 
     if (!game) return null
 
-    const handleAdd = () => {
-        const ok = addGame(game, status)
+    const handleAdd = async () => {
+        if (!user) return
+        const ok = await addGame(user.uid, game, status)
         if (ok) {
             toast.success(`"${game.name || game.title}" ditambahkan!`, { icon: '🎮', style: toastStyle })
         }
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        if (!user) return
         if (!inLibrary) {
-            addGame(game, status)
+            await addGame(user.uid, game, status)
         }
         const entry = isInLibrary(rawgId)
         if (entry) {
-            updateGame(entry.id, {
+            await updateGame(user.uid, entry.id, {
                 status,
                 personal_rating: personalRating ? Number(personalRating) : null,
                 play_hours: playHours ? Number(playHours) : 0,
@@ -66,9 +70,9 @@ export default function GameDetailModal({ game, onClose }) {
         toast.success('Saved!', { icon: '✅', style: toastStyle })
     }
 
-    const handleRemove = () => {
-        if (libraryEntry) {
-            removeGame(libraryEntry.id)
+    const handleRemove = async () => {
+        if (libraryEntry && user) {
+            await removeGame(user.uid, libraryEntry.id)
             toast.success('Dihapus dari library', { style: toastStyle })
             onClose()
         }

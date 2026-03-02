@@ -5,6 +5,7 @@ import {
     Star, Clock, FileText, ChevronDown, Trash2, Edit3, CheckCircle
 } from 'lucide-react'
 import useGameStore from '../store/useGameStore'
+import useAuthStore from '../store/useAuthStore'
 import GameDetailModal from '../components/GameDetailModal'
 import toast from 'react-hot-toast'
 
@@ -285,18 +286,25 @@ function GameGridCard({ entry, onEdit, onRemove, onStatusChange }) {
 export default function LibraryPage() {
     const library = useGameStore(s => s.library)
     const removeGame = useGameStore(s => s.removeGame)
-    const updateStatus = useGameStore(s => s.updateStatus)
+    const updateGame = useGameStore(s => s.updateGame)
+    const { user } = useAuthStore()
 
     const [activeTab, setActiveTab] = useState('all')
-    const [view, setView] = useState('grid') // 'grid' | 'list'
+    const [view, setView] = useState('grid')
     const [searchText, setSearchText] = useState('')
     const [selectedGame, setSelectedGame] = useState(null)
 
     const toastStyle = { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' }
 
-    const handleRemove = (id, title) => {
-        removeGame(id)
+    const handleRemove = async (docId, title) => {
+        if (!user) return
+        await removeGame(user.uid, docId)
         toast.success(`"${title}" dihapus`, { style: toastStyle })
+    }
+
+    const handleStatusChange = async (docId, newStatus) => {
+        if (!user) return
+        await updateGame(user.uid, docId, { status: newStatus })
     }
 
     const counts = useMemo(() => {
@@ -312,7 +320,7 @@ export default function LibraryPage() {
         if (searchText.trim()) {
             list = list.filter(g => g.title.toLowerCase().includes(searchText.toLowerCase()))
         }
-        return list.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+        return list
     }, [library, activeTab, searchText])
 
     return (
@@ -458,7 +466,7 @@ export default function LibraryPage() {
                                     entry={entry}
                                     onEdit={(e) => setSelectedGame({ ...e, id: e.rawg_id, name: e.title })}
                                     onRemove={handleRemove}
-                                    onStatusChange={updateStatus}
+                                    onStatusChange={handleStatusChange}
                                 />
                             ))}
                         </AnimatePresence>
@@ -492,7 +500,7 @@ export default function LibraryPage() {
                                     entry={entry}
                                     onEdit={(e) => setSelectedGame({ ...e, id: e.rawg_id, name: e.title })}
                                     onRemove={handleRemove}
-                                    onStatusChange={updateStatus}
+                                    onStatusChange={handleStatusChange}
                                 />
                             ))}
                         </AnimatePresence>
