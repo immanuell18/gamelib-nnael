@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth'
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db, googleProvider } from '../firebase'
 
@@ -15,12 +15,6 @@ const useAuthStore = create((set, get) => ({
 
     // ── Init: listen to auth state ──────────────────────────
     initAuth: () => {
-        // Tangkap hasil redirect dari Google login
-        getRedirectResult(auth).catch(err => {
-            if (err?.code !== 'auth/no-auth-event') {
-                console.warn('Redirect result:', err?.code)
-            }
-        })
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email)
@@ -49,11 +43,10 @@ const useAuthStore = create((set, get) => ({
         return unsub
     },
 
-    // ── Google Sign In ──────────────────────────────────────
+    // ── Google Sign In (popup — works on all browsers) ──────
     loginWithGoogle: async () => {
         try {
-            // Gunakan redirect agar tidak ada COOP warning
-            await signInWithRedirect(auth, googleProvider)
+            await signInWithPopup(auth, googleProvider)
             return { success: true }
         } catch (err) {
             console.error('Login error:', err)
