@@ -1,0 +1,16 @@
+{
+  "appId": "com.nnael.gamelib",
+  "appName": "GameLib",
+  "webDir": "dist",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": [
+        "google.com"
+      ],
+      "googleAuthOptions": {
+        "serverClientId": "631672825546-ifop0mmcq72frt1fi1srqg90513c2ov7.apps.googleusercontent.com"
+      }
+    }
+  }
+}

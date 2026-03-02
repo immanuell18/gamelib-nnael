@@ -2,16 +2,19 @@ import { create } from 'zustand'
 import {
     onAuthStateChanged,
     signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult,
+    GoogleAuthProvider,
+    signInWithCredential,
     signOut,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db, googleProvider } from '../firebase'
+import { auth, googleProvider, db } from '../firebase'
 
 const ADMIN_EMAILS = ['ellrz1718@gmail.com']
 
-// Simpan user ke Firestore — kalau gagal, tetap login!
+function isCapacitor() {
+    return typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+}
+
 async function syncUserToFirestore(firebaseUser) {
     try {
         const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email)
@@ -33,8 +36,7 @@ async function syncUserToFirestore(firebaseUser) {
         const profile = (await getDoc(userRef)).data()
         return { isAdmin, profile }
     } catch (err) {
-        // Firestore gagal → tetap return isAdmin berdasarkan email
-        console.warn('[Auth] Firestore sync failed (user still logged in):', err.code)
+        console.warn('[Auth] Firestore sync failed:', err.code)
         return { isAdmin: ADMIN_EMAILS.includes(firebaseUser.email), profile: null }
     }
 }
@@ -46,22 +48,8 @@ const useAuthStore = create((set) => ({
     loading: true,
 
     initAuth: () => {
-        // Cek redirect result (untuk mobile yang popup jadi redirect)
-        getRedirectResult(auth)
-            .then(async (result) => {
-                if (result?.user) {
-                    const { isAdmin, profile } = await syncUserToFirestore(result.user)
-                    set({ user: result.user, userProfile: profile, isAdmin, loading: false })
-                }
-            })
-            .catch((err) => {
-                // Bukan error fatal — biarkan onAuthStateChanged yang handle
-                console.warn('[Auth] getRedirectResult:', err?.code)
-            })
-
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // User berhasil login — sync ke Firestore (tapi kalau gagal tetap set user)
                 const { isAdmin, profile } = await syncUserToFirestore(firebaseUser)
                 set({ user: firebaseUser, userProfile: profile, isAdmin, loading: false })
             } else {
@@ -73,28 +61,31 @@ const useAuthStore = create((set) => ({
 
     loginWithGoogle: async () => {
         try {
-            await signInWithPopup(auth, googleProvider)
+            if (isCapacitor()) {
+                // Native Android: Google account picker bottom sheet
+                const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication')
+                const result = await FirebaseAuthentication.signInWithGoogle()
+                if (!result.credential?.idToken) throw new Error('No ID token received')
+                const credential = GoogleAuthProvider.credential(result.credential.idToken)
+                await signInWithCredential(auth, credential)
+            } else {
+                // Web: popup biasa
+                await signInWithPopup(auth, googleProvider)
+            }
             return { success: true }
         } catch (err) {
-            // Popup diblokir → fallback ke redirect
-            if (
-                err.code === 'auth/popup-blocked' ||
-                err.code === 'auth/popup-closed-by-user' ||
-                err.code === 'auth/cancelled-popup-request'
-            ) {
-                try {
-                    await signInWithRedirect(auth, googleProvider)
-                    return { success: true }
-                } catch (e2) {
-                    return { success: false, error: e2.message }
-                }
-            }
-            console.error('[Auth] loginWithGoogle error:', err.code)
+            console.error('[Auth] loginWithGoogle error:', err.code, err.message)
             return { success: false, error: err.message }
         }
     },
 
     logout: async () => {
+        try {
+            if (isCapacitor()) {
+                const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication')
+                await FirebaseAuthentication.signOut()
+            }
+        } catch (_) { }
         await signOut(auth)
         set({ user: null, userProfile: null, isAdmin: false })
     },

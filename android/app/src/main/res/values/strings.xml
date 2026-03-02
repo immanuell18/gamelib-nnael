@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GameLib</string>
+    <string name="title_activity_main">GameLib</string>
+    <string name="package_name">com.nnael.gamelib</string>
+    <string name="custom_url_scheme">com.nnael.gamelib</string>
+</resources>
