@@ -5,11 +5,11 @@ import { db } from '../firebase'
 import { Users, Gamepad2, Trophy, Clock, BarChart3, Search, RefreshCw } from 'lucide-react'
 
 const STATUS_COLORS = {
-    playing: { bg: 'var(--green-dim)', color: 'var(--green)', label: 'Playing' },
-    completed: { bg: 'rgba(124,58,237,0.1)', color: 'var(--accent-light)', label: 'Completed' },
-    'on-hold': { bg: 'var(--yellow-dim)', color: 'var(--yellow)', label: 'On Hold' },
-    wishlist: { bg: 'rgba(67,97,238,0.12)', color: '#6b8cff', label: 'Wishlist' },
-    dropped: { bg: 'rgba(255,56,100,0.1)', color: 'var(--red)', label: 'Dropped' },
+    playing: { bg: 'var(--green-dim)', color: 'var(--green)', label: 'Playing', icon: 'bi-controller' },
+    completed: { bg: 'rgba(124,58,237,0.1)', color: 'var(--accent-light)', label: 'Completed', icon: 'bi-trophy-fill' },
+    'on-hold': { bg: 'var(--yellow-dim)', color: 'var(--yellow)', label: 'On Hold', icon: 'bi-pause-circle-fill' },
+    wishlist: { bg: 'rgba(67,97,238,0.12)', color: '#6b8cff', label: 'Wishlist', icon: 'bi-bookmark-fill' },
+    dropped: { bg: 'rgba(255,56,100,0.1)', color: 'var(--red)', label: 'Dropped', icon: 'bi-x-circle-fill' },
 }
 
 export default function AdminPage() {
@@ -85,8 +85,8 @@ export default function AdminPage() {
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.75rem', background: 'rgba(255,56,100,0.1)', border: '1px solid rgba(255,56,100,0.3)', borderRadius: '4px', marginBottom: '0.75rem' }}>
                                 <span style={{ fontSize: '0.7rem', color: 'var(--red)', fontWeight: 700, letterSpacing: '0.08em', fontFamily: 'Orbitron, monospace' }}>ADMIN PANEL</span>
                             </div>
-                            <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
-                                User Management 🛡️
+                            <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                User Management <i className="bi bi-shield-fill" style={{ color: 'var(--red)', fontSize: '1.25rem' }} />
                             </h1>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                                 Last updated: {lastRefresh.toLocaleTimeString()}
@@ -202,7 +202,9 @@ export default function AdminPage() {
                                                                     {STATUS_COLORS[g.status]?.label || g.status}
                                                                 </span>
                                                                 {g.personal_rating && (
-                                                                    <span style={{ fontSize: '0.7rem', color: 'var(--yellow)', fontWeight: 700 }}>⭐{g.personal_rating}</span>
+                                                                    <span style={{ fontSize: '0.7rem', color: 'var(--yellow)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                                        <i className="bi bi-star-fill" style={{ fontSize: '0.6rem' }} /> {g.personal_rating}
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                         ))}

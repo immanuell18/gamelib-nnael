@@ -6,11 +6,11 @@ import useAuthStore from '../store/useAuthStore'
 import toast from 'react-hot-toast'
 
 const STATUSES = [
-    { value: 'playing', label: '🎮 Playing', badge: 'badge-playing' },
-    { value: 'completed', label: '🏆 Completed', badge: 'badge-completed' },
-    { value: 'on-hold', label: '⏸️ On Hold', badge: 'badge-onhold' },
-    { value: 'wishlist', label: '📝 Wishlist', badge: 'badge-wishlist' },
-    { value: 'dropped', label: '❌ Dropped', badge: 'badge-dropped' },
+    { value: 'playing', label: 'Playing', icon: 'bi-controller', badge: 'badge-playing' },
+    { value: 'completed', label: 'Completed', icon: 'bi-trophy-fill', badge: 'badge-completed' },
+    { value: 'on-hold', label: 'On Hold', icon: 'bi-pause-circle-fill', badge: 'badge-onhold' },
+    { value: 'wishlist', label: 'Wishlist', icon: 'bi-bookmark-fill', badge: 'badge-wishlist' },
+    { value: 'dropped', label: 'Dropped', icon: 'bi-x-circle-fill', badge: 'badge-dropped' },
 ]
 
 const toastStyle = {
@@ -222,7 +222,7 @@ export default function GameDetailModal({ game, onClose }) {
                                             transition: 'all 0.15s ease',
                                         }}
                                     >
-                                        {s.label}
+                                        <i className={`bi ${s.icon}`} style={{ fontSize: '0.85rem' }} /> {s.label}
                                     </button>
                                 ))}
                             </div>
@@ -231,8 +231,8 @@ export default function GameDetailModal({ game, onClose }) {
                         {/* Personal rating & hours */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>
-                                    ⭐ My Rating (1–10)
+                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                                    <i className="bi bi-star-fill" style={{ color: 'var(--yellow)' }} /> My Rating (1–10)
                                 </label>
                                 <input
                                     id="personal-rating-input"

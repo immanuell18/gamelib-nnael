@@ -10,12 +10,12 @@ import GameDetailModal from '../components/GameDetailModal'
 import toast from 'react-hot-toast'
 
 const STATUS_TABS = [
-    { key: 'all', label: 'All', icon: '🎮', badge: null },
-    { key: 'playing', label: 'Playing', icon: '🎮', badge: 'badge-playing' },
-    { key: 'completed', label: 'Completed', icon: '🏆', badge: 'badge-completed' },
-    { key: 'on-hold', label: 'On Hold', icon: '⏸️', badge: 'badge-onhold' },
-    { key: 'wishlist', label: 'Wishlist', icon: '📝', badge: 'badge-wishlist' },
-    { key: 'dropped', label: 'Dropped', icon: '❌', badge: 'badge-dropped' },
+    { key: 'all', label: 'All', icon: <i className="bi bi-grid-fill" />, badge: null },
+    { key: 'playing', label: 'Playing', icon: <i className="bi bi-controller" />, badge: 'badge-playing' },
+    { key: 'completed', label: 'Completed', icon: <i className="bi bi-trophy-fill" />, badge: 'badge-completed' },
+    { key: 'on-hold', label: 'On Hold', icon: <i className="bi bi-pause-circle-fill" />, badge: 'badge-onhold' },
+    { key: 'wishlist', label: 'Wishlist', icon: <i className="bi bi-bookmark-fill" />, badge: 'badge-wishlist' },
+    { key: 'dropped', label: 'Dropped', icon: <i className="bi bi-x-circle-fill" />, badge: 'badge-dropped' },
 ]
 
 const STATUS_COLOR = {

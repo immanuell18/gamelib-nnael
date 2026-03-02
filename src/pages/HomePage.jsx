@@ -281,15 +281,15 @@ export default function HomePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
                         <div style={{ width: '3px', height: '20px', background: 'linear-gradient(to bottom, var(--accent), var(--cyan))', borderRadius: '2px' }} />
                         <h2 className="section-title">Your Journey</h2>
-                        <span style={{ fontSize: '1.25rem' }}>🎯</span>
+                        <i className="bi bi-crosshair" style={{ color: 'var(--cyan)', fontSize: '1.1rem' }} />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '0.875rem' }}>
-                        <StatCard icon="🎮" label="Currently Playing" value={stats.playing} color="var(--green)" delay={0.05} />
-                        <StatCard icon="🏆" label="Completed" value={stats.completed} color="var(--accent-light)" delay={0.1} accent />
-                        <StatCard icon="⏸️" label="On Hold" value={stats.onHold} color="var(--yellow)" delay={0.15} />
-                        <StatCard icon="📝" label="Wishlist" value={stats.wishlist} color="#6b8cff" delay={0.2} />
-                        <StatCard icon="🕐" label="Total Hours" value={`${stats.totalHours}h`} color="var(--orange)" delay={0.25} />
-                        <StatCard icon="⭐" label="Avg Rating" value={stats.avgRating || '—'} color="var(--yellow)" delay={0.3} />
+                        <StatCard icon={<i className="bi bi-controller" />} label="Currently Playing" value={stats.playing} color="var(--green)" delay={0.05} />
+                        <StatCard icon={<i className="bi bi-trophy-fill" />} label="Completed" value={stats.completed} color="var(--accent-light)" delay={0.1} accent />
+                        <StatCard icon={<i className="bi bi-pause-circle" />} label="On Hold" value={stats.onHold} color="var(--yellow)" delay={0.15} />
+                        <StatCard icon={<i className="bi bi-bookmark-fill" />} label="Wishlist" value={stats.wishlist} color="#6b8cff" delay={0.2} />
+                        <StatCard icon={<i className="bi bi-clock-fill" />} label="Total Hours" value={`${stats.totalHours}h`} color="var(--orange)" delay={0.25} />
+                        <StatCard icon={<i className="bi bi-star-fill" />} label="Avg Rating" value={stats.avgRating || '—'} color="var(--yellow)" delay={0.3} />
                     </div>
                 </div>
             </section>
@@ -304,7 +304,7 @@ export default function HomePage() {
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                 <div style={{ width: '3px', height: '20px', background: 'linear-gradient(to bottom, var(--cyan), var(--accent))', borderRadius: '2px' }} />
-                                <h2 className="section-title">Recent Activity 🕹️</h2>
+                                <h2 className="section-title">Recent Activity <i className="bi bi-joystick" style={{ color: 'var(--cyan)', fontSize: '1.1rem', verticalAlign: 'middle' }} /></h2>
                             </div>
                             <Link to="/library" className="btn-ghost" style={{ fontSize: '0.8rem' }}>
                                 View All <ArrowRight size={13} />
@@ -331,7 +331,7 @@ export default function HomePage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{ width: '3px', height: '20px', background: 'linear-gradient(to bottom, var(--red), var(--orange))', borderRadius: '2px' }} />
                             <TrendingUp size={18} color="var(--orange)" />
-                            <h2 className="section-title">Trending Games 🔥</h2>
+                            <h2 className="section-title">Trending Games <i className="bi bi-fire" style={{ color: 'var(--orange)', fontSize: '1.1rem', verticalAlign: 'middle' }} /></h2>
                         </div>
                         <Link to="/search" className="btn-ghost" style={{ fontSize: '0.8rem' }}>
                             See More <ArrowRight size={13} />

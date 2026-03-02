@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
-    playing: { label: 'Playing', badge: 'badge-playing', icon: '🎮' },
-    completed: { label: 'Completed', badge: 'badge-completed', icon: '🏆' },
-    'on-hold': { label: 'On Hold', badge: 'badge-onhold', icon: '⏸️' },
-    wishlist: { label: 'Wishlist', badge: 'badge-wishlist', icon: '📝' },
-    dropped: { label: 'Dropped', badge: 'badge-dropped', icon: '❌' },
+    playing: { label: 'Playing', badge: 'badge-playing', icon: 'bi-controller' },
+    completed: { label: 'Completed', badge: 'badge-completed', icon: 'bi-trophy-fill' },
+    'on-hold': { label: 'On Hold', badge: 'badge-onhold', icon: 'bi-pause-circle-fill' },
+    wishlist: { label: 'Wishlist', badge: 'badge-wishlist', icon: 'bi-bookmark-fill' },
+    dropped: { label: 'Dropped', badge: 'badge-dropped', icon: 'bi-x-circle-fill' },
 }
 
 const IMG_FALLBACK = 'https://placehold.co/400x225/111120/4a4a6a?text=No+Image'
@@ -91,7 +91,7 @@ export default function GameCard({ game, index = 0, onOpenDetail }) {
                 <div style={{ position: 'absolute', top: '0.5rem', left: '0.5rem', right: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     {inLibrary && libraryEntry?.status && (
                         <span className={`badge ${STATUS_CONFIG[libraryEntry.status]?.badge}`}>
-                            {STATUS_CONFIG[libraryEntry.status]?.icon} {STATUS_CONFIG[libraryEntry.status]?.label}
+                            <i className={`bi ${STATUS_CONFIG[libraryEntry.status]?.icon}`} style={{ fontSize: '0.7rem' }} /> {STATUS_CONFIG[libraryEntry.status]?.label}
                         </span>
                     )}
                     {game.metacritic && (

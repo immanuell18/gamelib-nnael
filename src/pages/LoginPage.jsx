@@ -11,10 +11,10 @@ const toastStyle = {
 }
 
 const features = [
-    { icon: '🎮', text: 'Track semua game yang pernah kamu mainin' },
-    { icon: '⭐', text: 'Kasih personal rating & review' },
-    { icon: '📊', text: 'Lihat statistik gaming journey kamu' },
-    { icon: '🔍', text: 'Discover jutaan game via RAWG API' },
+    { icon: 'bi-controller', text: 'Track semua game yang pernah kamu mainin' },
+    { icon: 'bi-star-fill', text: 'Kasih personal rating & review' },
+    { icon: 'bi-bar-chart-fill', text: 'Lihat statistik gaming journey kamu' },
+    { icon: 'bi-search', text: 'Discover jutaan game via RAWG API' },
 ]
 
 export default function LoginPage() {
@@ -121,7 +121,9 @@ export default function LoginPage() {
                             transition={{ delay: 0.3 + i * 0.07 }}
                             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
                         >
-                            <span style={{ fontSize: '1.25rem' }}>{f.icon}</span>
+                            <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `rgba(124,58,237,0.12)`, border: '1px solid rgba(124,58,237,0.25)', borderRadius: '8px', flexShrink: 0 }}>
+                                <i className={`bi ${f.icon}`} style={{ fontSize: '1rem', color: 'var(--accent-light)' }} />
+                            </div>
                             <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{f.text}</span>
                         </motion.div>
                     ))}
@@ -145,7 +147,9 @@ export default function LoginPage() {
                 <div style={{ width: '100%', maxWidth: '340px' }}>
                     {/* Header */}
                     <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>👾</div>
+                        <div style={{ width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,214,245,0.1))', border: '1px solid rgba(124,58,237,0.3)', borderRadius: '16px', margin: '0 auto 0.875rem' }}>
+                            <i className="bi bi-person-circle" style={{ fontSize: '1.75rem', color: 'var(--accent-light)' }} />
+                        </div>
                         <h2 style={{
                             fontFamily: 'Outfit, sans-serif',
                             fontSize: '1.625rem',
