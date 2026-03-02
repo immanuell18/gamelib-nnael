@@ -15,6 +15,12 @@ const useAuthStore = create((set, get) => ({
 
     // ── Init: listen to auth state ──────────────────────────
     initAuth: () => {
+        // Tangkap hasil redirect dari Google login
+        getRedirectResult(auth).catch(err => {
+            if (err?.code !== 'auth/no-auth-event') {
+                console.warn('Redirect result:', err?.code)
+            }
+        })
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 const isAdmin = ADMIN_EMAILS.includes(firebaseUser.email)
