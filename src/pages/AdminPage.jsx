@@ -121,7 +121,7 @@ export default function AdminPage() {
                     ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem', alignItems: 'start' }}>
+                <div id="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem', alignItems: 'start' }}>
                     {/* User list */}
                     <div>
                         {/* Search */}
@@ -227,7 +227,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Sidebar: Top games */}
-                    <div>
+                    <div id="admin-sidebar">
                         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '0.875rem', padding: '1.25rem', position: 'sticky', top: '80px' }}>
                             <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <BarChart3 size={16} color="var(--accent-light)" /> Most Tracked Games

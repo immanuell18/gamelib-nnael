@@ -28,7 +28,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div style={{
+        <div id="login-layout" style={{
             minHeight: '100vh',
             display: 'flex',
             background: 'var(--bg-primary)',
@@ -51,6 +51,7 @@ export default function LoginPage() {
 
             {/* Left panel — branding */}
             <motion.div
+                id="login-left"
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
@@ -132,6 +133,7 @@ export default function LoginPage() {
 
             {/* Right panel — login form */}
             <motion.div
+                id="login-right"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}

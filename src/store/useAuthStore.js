@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db, googleProvider } from '../firebase'
 
@@ -46,7 +46,8 @@ const useAuthStore = create((set, get) => ({
     // ── Google Sign In ──────────────────────────────────────
     loginWithGoogle: async () => {
         try {
-            await signInWithPopup(auth, googleProvider)
+            // Gunakan redirect agar tidak ada COOP warning
+            await signInWithRedirect(auth, googleProvider)
             return { success: true }
         } catch (err) {
             console.error('Login error:', err)

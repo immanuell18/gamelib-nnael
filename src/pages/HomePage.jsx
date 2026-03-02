@@ -230,6 +230,7 @@ export default function HomePage() {
 
                         {/* CTA buttons */}
                         <motion.div
+                            className="hero-cta"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.45 }}
@@ -283,7 +284,7 @@ export default function HomePage() {
                         <h2 className="section-title">Your Journey</h2>
                         <i className="bi bi-crosshair" style={{ color: 'var(--cyan)', fontSize: '1.1rem' }} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '0.875rem' }}>
+                    <div id="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '0.875rem' }}>
                         <StatCard icon={<i className="bi bi-controller" />} label="Currently Playing" value={stats.playing} color="var(--green)" delay={0.05} />
                         <StatCard icon={<i className="bi bi-trophy-fill" />} label="Completed" value={stats.completed} color="var(--accent-light)" delay={0.1} accent />
                         <StatCard icon={<i className="bi bi-pause-circle" />} label="On Hold" value={stats.onHold} color="var(--yellow)" delay={0.15} />
