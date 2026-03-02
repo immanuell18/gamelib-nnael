@@ -231,7 +231,7 @@ export default function GameDetailModal({ game, onClose }) {
                         {/* Personal rating & hours */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                                     <i className="bi bi-star-fill" style={{ color: 'var(--yellow)' }} /> My Rating (1–10)
                                 </label>
                                 <input
